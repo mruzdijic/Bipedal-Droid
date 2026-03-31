@@ -32,3 +32,18 @@ Bipedal-Droid/
 
 ## Quick Start
 Please refer to `install_instructions.md` to configure your PC to run Isaac Sim and ROS2 properly for this workspace.
+
+## Backbone
+Use a model from IsaacSim Assets
+Movement based on relative data and polar coordinates/values. move R, angle theta
+Determine sensors for application
+- IMU
+- Gyroscope
+- Lidar maybe?
+- servos which already have encoders (duh)
+Stable Baselines - Python Library (PPO?) - explore other options
+Building in Isaac Lab - must run on primary laptop
+- Read over documentation (follow isaaclab installation, not isaacsim installation)
+
+Stable Baselines link
+  https://stable-baselines3.readthedocs.io/en/master/guide
