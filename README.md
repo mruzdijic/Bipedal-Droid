@@ -1,49 +1,32 @@
-# Bipedal ML Foundation (BD-Droid Style)
+# Bipedal ML Foundation (Isaac Lab Version)
 
-This repository contains the foundational code for training and simulating a bipedal robot using Deep Reinforcement Learning (DRL) via Stable Baselines3 within **NVIDIA Omniverse Isaac Sim**, alongside **ROS2 Humble** integration for hybrid learning/teleop capabilities.
+This repository contains the foundational code for training a bipedal robot using Deep Reinforcement Learning (DRL) via **Stable Baselines3** within the **NVIDIA Isaac Lab** ecosystem.
 
-## Robot Configuration
+## Backbone
 
-The biped mimics a Star Wars BD droid with digitigrade legs.
-
-- **DOF:** 12 total (6 DOF per leg).
-  - Hip: 3 DOF (Roll, Pitch, Yaw)
-  - Knee: 1 DOF (Pitch)
-  - Ankle: 2 DOF (Pitch, Roll)
-- **Geometry Dimensions:**
-  - Torso: Main chassis
-  - Upper Leg (Thigh): 100mm
-  - Lower Leg (Shin): 100mm
-  - Foot: 50-60mm
+This project explicitly adheres to the following pipeline:
+- **Environment Framework:** NVIDIA Isaac Lab (built on top of Isaac Sim).
+- **Robot Asset:** The high-fidelity **Cassie** biped model directly from the regular Isaac Sim Nucleus server.
+- **Commands:** Cartesian Coordinates `(vx, vy, yaw_rate)`.
+- **Sensors Simulated:**
+  - IMU (Base linear acceleration)
+  - Gyroscope (Base angular velocity)
+  - Joint Encoders (Joint positions & velocities)
+- **RL Framework:** Stable Baselines 3 (PPO algorithm).
 
 ## Project Structure
 
 ```
 Bipedal-Droid/
 ├── README.md
-├── install_instructions.md          (Commands for setup on a secondary machine)
-├── urdf/
-│   └── biped.urdf                   (Definition of our BD-style robot)
-└── isaac_scripts/                   (Future scripts for physics, ROS2 bridges, & RL)
-    ├── biped_env.py
-    ├── train.py
-    └── biped_ros2_bridge.py
+├── install_instructions.md                   (Crucial steps for the Isaac Lab script!)
+└── isaaclab_workspace/                       (The Isaac Lab extension scaffolding)
+    └── exts/
+        └── biped_ml/                         (Our custom RL environment)
+            ├── __init__.py                   (Registers env with OpenAI Gym)
+            ├── env_cfg.py                    (ManagerBasedRLEnv Config for Cassie)
+            └── train_sb3.py                  (SB3 Training Execution Script)
 ```
 
 ## Quick Start
-Please refer to `install_instructions.md` to configure your PC to run Isaac Sim and ROS2 properly for this workspace.
-
-## Backbone
-Use a model from IsaacSim Assets
-Movement based on relative data and polar coordinates/values. move R, angle theta
-Determine sensors for application
-- IMU
-- Gyroscope
-- Lidar maybe?
-- servos which already have encoders (duh)
-Stable Baselines - Python Library (PPO?) - explore other options
-Building in Isaac Lab - must run on primary laptop
-- Read over documentation (follow isaaclab installation, not isaacsim installation)
-
-Stable Baselines link
-  https://stable-baselines3.readthedocs.io/en/master/guide
+Please refer to `install_instructions.md` to configure your primary laptop. You must clone the official Isaac Lab repository and link it.
