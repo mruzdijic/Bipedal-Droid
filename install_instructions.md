@@ -11,7 +11,7 @@ You cannot run Isaac Lab without the base engine.
 2. Go to the "Exchange" tab, search for **Isaac Sim**.
 3. Install version **4.1.0** (or the latest version compatible with the current Isaac Lab `main` branch).
 
-## 2. Clone Isaac Lab
+## 2. Clone Isaac Lab 
 Open a terminal in your workspace directory and clone the official repository:
 
 ```bash
