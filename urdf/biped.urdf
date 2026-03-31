@@ -1,0 +1,287 @@
+<?xml version="1.0"?>
+<robot name="bd_biped">
+
+  <!-- Materials -->
+  <material name="white"><color rgba="0.9 0.9 0.9 1.0"/></material>
+  <material name="black"><color rgba="0.1 0.1 0.1 1.0"/></material>
+  <material name="orange"><color rgba="1.0 0.5 0.0 1.0"/></material>
+
+  <!-- BODY / TORSO -->
+  <link name="base_link">
+    <visual>
+      <geometry><box size="0.15 0.2 0.25"/></geometry>
+      <origin xyz="0 0 0.125" rpy="0 0 0"/>
+      <material name="white"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.15 0.2 0.25"/></geometry>
+      <origin xyz="0 0 0.125" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="5.0"/>
+      <origin xyz="0 0 0.125" rpy="0 0 0"/>
+      <inertia ixx="0.04" ixy="0" ixz="0" iyy="0.04" iyz="0" izz="0.02"/>
+    </inertial>
+  </link>
+
+  <!-- ==================== LEFT LEG ==================== -->
+  
+  <!-- Hip Yaw -->
+  <link name="l_hip_yaw_link">
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+  <joint name="l_hip_yaw" type="revolute">
+    <parent link="base_link"/>
+    <child link="l_hip_yaw_link"/>
+    <origin xyz="0 0.12 0" rpy="0 0 0"/> <!-- Offset from torso center laterally -->
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.5" upper="0.5" effort="10" velocity="5.0"/>
+  </joint>
+
+  <!-- Hip Roll -->
+  <link name="l_hip_roll_link">
+    <visual>
+      <geometry><cylinder radius="0.03" length="0.04"/></geometry>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <material name="black"/>
+    </visual>
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/>
+    </inertial>
+  </link>
+  <joint name="l_hip_roll" type="revolute">
+    <parent link="l_hip_yaw_link"/>
+    <child link="l_hip_roll_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.5" upper="0.5" effort="10" velocity="5.0"/>
+  </joint>
+
+  <!-- Hip Pitch -> Upper Leg (Thigh) -->
+  <link name="l_upper_leg">
+    <visual>
+      <geometry><cylinder radius="0.02" length="0.1"/></geometry>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/> <!-- Origin at top, extending downwards 100mm -->
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.02" length="0.1"/></geometry>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.6"/>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+  <joint name="l_hip_pitch" type="revolute">
+    <parent link="l_hip_roll_link"/>
+    <child link="l_upper_leg"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <!-- Leg sweeps forward and backward -->
+    <limit lower="-1.57" upper="1.57" effort="20" velocity="5.0"/>
+  </joint>
+
+  <!-- Knee Pitch -> Lower Leg (Shin) -->
+  <!-- BD Droid bird leg bends BACKWARD at the knee. So resting state implies it bends back (-) or limits enforce it -->
+  <link name="l_lower_leg">
+    <visual>
+      <geometry><cylinder radius="0.018" length="0.1"/></geometry>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/> <!-- Extending downwards 100mm -->
+      <material name="white"/>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.018" length="0.1"/></geometry>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.4"/>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+      <inertia ixx="0.0005" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+  <joint name="l_knee_pitch" type="revolute">
+    <parent link="l_upper_leg"/>
+    <child link="l_lower_leg"/>
+    <origin xyz="0 0 -0.1" rpy="0 0 0"/> <!-- Joint is at the bottom of the 100mm Thigh -->
+    <axis xyz="0 1 0"/>
+    <!-- Bird leg: Should only be able to bend strictly backwards (positive pitch in this frame assuming forward is +x, or depending on sign conventions) -->
+    <limit lower="-2.6" upper="0.0" effort="20" velocity="5.0"/>
+  </joint>
+
+  <!-- Ankle Pitch -->
+  <link name="l_ankle_pitch_link">
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+  <joint name="l_ankle_pitch" type="revolute">
+    <parent link="l_lower_leg"/>
+    <child link="l_ankle_pitch_link"/>
+    <origin xyz="0 0 -0.1" rpy="0 0 0"/> <!-- Joint is at the bottom of the 100mm Shin -->
+    <axis xyz="0 1 0"/>
+    <!-- Compensates for the knee bend so the foot points forward -->
+    <limit lower="-1.0" upper="1.57" effort="10" velocity="5.0"/>
+  </joint>
+
+  <!-- Ankle Roll -> Foot -->
+  <link name="l_foot">
+    <visual>
+      <geometry><box size="0.06 0.04 0.015"/></geometry> <!-- 60mm length, 40mm width -->
+      <origin xyz="0.015 0 -0.0075" rpy="0 0 0"/> <!-- Foot protrudes more forwards than backwards -->
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.06 0.04 0.015"/></geometry>
+      <origin xyz="0.015 0 -0.0075" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.2"/>
+      <origin xyz="0.015 0 -0.0075" rpy="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/>
+    </inertial>
+  </link>
+  <joint name="l_ankle_roll" type="revolute">
+    <parent link="l_ankle_pitch_link"/>
+    <child link="l_foot"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.5" upper="0.5" effort="10" velocity="5.0"/>
+  </joint>
+
+
+  <!-- ==================== RIGHT LEG ==================== -->
+  
+  <!-- Hip Yaw -->
+  <link name="r_hip_yaw_link">
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+  <joint name="r_hip_yaw" type="revolute">
+    <parent link="base_link"/>
+    <child link="r_hip_yaw_link"/>
+    <origin xyz="0 -0.12 0" rpy="0 0 0"/> <!-- Offset from torso center laterally (Right side) -->
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.5" upper="0.5" effort="10" velocity="5.0"/>
+  </joint>
+
+  <!-- Hip Roll -->
+  <link name="r_hip_roll_link">
+    <visual>
+      <geometry><cylinder radius="0.03" length="0.04"/></geometry>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <material name="black"/>
+    </visual>
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/>
+    </inertial>
+  </link>
+  <joint name="r_hip_roll" type="revolute">
+    <parent link="r_hip_yaw_link"/>
+    <child link="r_hip_roll_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.5" upper="0.5" effort="10" velocity="5.0"/>
+  </joint>
+
+  <!-- Hip Pitch -> Upper Leg (Thigh) -->
+  <link name="r_upper_leg">
+    <visual>
+      <geometry><cylinder radius="0.02" length="0.1"/></geometry>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/> <!-- Origin at top, extending downwards 100mm -->
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.02" length="0.1"/></geometry>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.6"/>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+  <joint name="r_hip_pitch" type="revolute">
+    <parent link="r_hip_roll_link"/>
+    <child link="r_upper_leg"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.57" upper="1.57" effort="20" velocity="5.0"/>
+  </joint>
+
+  <!-- Knee Pitch -> Lower Leg (Shin) -->
+  <link name="r_lower_leg">
+    <visual>
+      <geometry><cylinder radius="0.018" length="0.1"/></geometry>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/> 
+      <material name="white"/>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.018" length="0.1"/></geometry>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.4"/>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+      <inertia ixx="0.0005" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+  <joint name="r_knee_pitch" type="revolute">
+    <parent link="r_upper_leg"/>
+    <child link="r_lower_leg"/>
+    <origin xyz="0 0 -0.1" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <!-- Bird leg bends backward -->
+    <limit lower="-2.6" upper="0.0" effort="20" velocity="5.0"/>
+  </joint>
+
+  <!-- Ankle Pitch -->
+  <link name="r_ankle_pitch_link">
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+  <joint name="r_ankle_pitch" type="revolute">
+    <parent link="r_lower_leg"/>
+    <child link="r_ankle_pitch_link"/>
+    <origin xyz="0 0 -0.1" rpy="0 0 0"/> 
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.0" upper="1.57" effort="10" velocity="5.0"/>
+  </joint>
+
+  <!-- Ankle Roll -> Foot -->
+  <link name="r_foot">
+    <visual>
+      <geometry><box size="0.06 0.04 0.015"/></geometry> <!-- 60mm length, 40mm width -->
+      <origin xyz="0.015 0 -0.0075" rpy="0 0 0"/>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.06 0.04 0.015"/></geometry>
+      <origin xyz="0.015 0 -0.0075" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.2"/>
+      <origin xyz="0.015 0 -0.0075" rpy="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/>
+    </inertial>
+  </link>
+  <joint name="r_ankle_roll" type="revolute">
+    <parent link="r_ankle_pitch_link"/>
+    <child link="r_foot"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.5" upper="0.5" effort="10" velocity="5.0"/>
+  </joint>
+
+</robot>
